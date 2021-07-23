@@ -1,0 +1,66 @@
+module clock_time( iclk, ikey, okey_count, ohour, omin, osec);
+
+input iclk;
+input [4:0] ikey;
+output [7:0] ohour, omin, osec, okey_count;
+
+
+reg [7:0] thour, tmin, tsec, tkey_count;
+
+assign osec[3:0] = tsec%10;
+assign osec[7:4] = tsec/10;
+
+assign omin[3:0] = tmin%10;
+assign omin[7:4] = tmin/10;
+
+assign ohour[3:0] = thour%10;
+assign ohour[7:4] = thour/10;
+
+assign okey_count[3:0] = tkey_count%10;
+assign okey_count[7:4] = tkey_count/10;
+
+always @(posedge iclk)
+begin
+
+if (!ikey[0])
+begin
+thour <= 0;
+tmin <= 0;
+tsec <= 0;
+tkey_count <= 0; 
+end
+
+if (!ikey[2])
+begin
+tkey_count <= tkey_count+1'b1;
+if (thour==11) thour <= 0; else thour <=thour+1;
+end
+
+if (!ikey[1])
+begin
+tkey_count <= tkey_count+1'b1;
+if (tmin ==59) tmin<=0; else tmin <= tmin+1;
+end
+
+else if (thour==11 && tmin==59 && tsec==59)
+begin
+thour <= 0;
+tmin <= 0;
+tsec <= 0;
+end
+else if (tmin==59 && tsec==59)
+begin
+thour <= thour+1;
+tmin <= 0;
+tsec <= 0;
+end
+else if (tsec == 59)
+begin
+tmin <= tmin+1;
+tsec <= 0;
+end
+else
+tsec <= tsec + 1;
+end
+
+endmodule
